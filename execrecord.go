@@ -36,7 +36,7 @@ import (
 //
 // The three line-oriented fields are nil when the corresponding stream was empty,
 // never a single empty string.
-type ExecutionRecord struct {
+type Record struct {
 	RetCode  ExitCode  `json:"RetCode"`
 	Error    []string  `json:"Error"`
 	Stdout   []string  `json:"Stdout"`
@@ -50,8 +50,8 @@ type ExecutionRecord struct {
 // stream yields a nil slice rather than a one-element slice holding "", so callers
 // can test emptiness with len(). Leading whitespace is preserved: indentation is
 // meaningful in command output.
-func New(retCode ExitCode, execError string, stdout string, stderr string, execTime time.Time) *ExecutionRecord {
-	return &ExecutionRecord{
+func NewRecord(retCode ExitCode, execError string, stdout string, stderr string, execTime time.Time) *Record {
+	return &Record{
 		RetCode:  retCode,
 		Error:    splitLines(strings.TrimSpace(execError)),
 		Stdout:   splitLines(strings.TrimRight(stdout, "\r\n\t ")),
@@ -70,13 +70,13 @@ func splitLines(s string) []string {
 
 // String returns a formatted representation of the record, with stdout and stderr
 // truncated to keep it usable in a log line. Use Raw for the untruncated form.
-func (e *ExecutionRecord) String() string {
+func (e *Record) String() string {
 	return fmt.Sprintf("RetCode: %d, Error: %s, Stdout: %s, Stderr: %s, ExecTime: %s",
 		e.RetCode, strings.Join(e.Error, "\n"), truncate(e.Stdout, 80), truncate(e.Stderr, 80), e.ExecTime)
 }
 
 // Raw returns a formatted representation of the record with output streams intact.
-func (e *ExecutionRecord) Raw() string {
+func (e *Record) Raw() string {
 	return fmt.Sprintf("RetCode: %d, Error: %s, Stdout: %s, Stderr: %s, ExecTime: %s",
 		e.RetCode, strings.Join(e.Error, "\n"), strings.Join(e.Stdout, "\n"), strings.Join(e.Stderr, "\n"), e.ExecTime)
 }
